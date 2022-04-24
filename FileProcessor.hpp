@@ -10,6 +10,7 @@ namespace DistinctWords
         FileProcessor(std::string fileName);
         std::ifstream &getFile();
         FileProcessingType getFileProcessingType();
+        void closeFile();
 
     private:
         void setFileProcessingMethod(std::string firstLineFromFile);

@@ -35,10 +35,5 @@ int main(int argc, char **argv)
 
     std::cout << distinctWords->size() << std::endl;
 
-    // for(auto word : *distinctWords)
-    // {
-    //     std::cout<<word.first<<std::endl;
-    // }
-
     return 0;
 }

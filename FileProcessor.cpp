@@ -58,4 +58,10 @@ namespace DistinctWords
             std::cout << "WARNING!!! Return value may be empty";
         return file;
     }
+
+    void FileProcessor::closeFile()
+    {
+        if (file.is_open())
+            file.close();
+    }
 }

@@ -4,3 +4,5 @@
 testFile*
 #ignore vs code folder
 .vscode/
+#ignore zip files
+*zip

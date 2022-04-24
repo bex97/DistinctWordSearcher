@@ -5,6 +5,7 @@
 #include <mutex>
 #include <memory>
 #include <map>
+#include <regex>
 #include "FileProcessor.hpp"
 #include "Utils.hpp"
 
@@ -22,11 +23,12 @@ namespace DistinctWords
     private:
         std::vector<std::string> splitWords(std::string stringFromFile);
         void addDistinctWords(std::string newLineFromFile);
-        void addDistinctWord(std::string newWord);
         void processFileByLines(std::ifstream &textFile);
         void processFileByWords(std::ifstream &textFile);
-        void pushWordsFromVectorToMap(std::vector<std::string> vecOfWords);
+        void pushWordsToMap(std::vector<std::string> &vecOfWords);
         void pushNewWordToMap(std::string);
+        void processFoundWord(std::smatch &wordMatch, std::vector<std::string> &vecOfWords, std::string &stringFromFile);
+        void processNewStringDelimitedBySpace(std::string stringFromFile);
 
         std::shared_ptr<std::mutex> mutexForFileAccess;
         std::shared_ptr<std::mutex> mutexForMapAccess;
