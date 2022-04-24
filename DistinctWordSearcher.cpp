@@ -18,7 +18,7 @@ namespace DistinctWords
     {
         std::vector<std::string> vecOfWords;
         std::smatch wordMatch;
-        std::regex regex("[a-zA-Z]+\\s+");
+        std::regex regex("[a-z]+\\s+");
         while (std::regex_search(stringFromFile, wordMatch, regex))
         {
             processFoundWord(wordMatch, vecOfWords, stringFromFile);
