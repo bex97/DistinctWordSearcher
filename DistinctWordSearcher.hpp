@@ -7,7 +7,6 @@
 #include <map>
 #include <regex>
 #include "FileProcessor.hpp"
-#include "Utils.hpp"
 
 namespace DistinctWords
 {
@@ -23,12 +22,10 @@ namespace DistinctWords
     private:
         std::vector<std::string> splitWords(std::string stringFromFile);
         void addDistinctWords(std::string newLineFromFile);
-        void processFileByLines(std::ifstream &textFile);
-        void processFileByWords(std::ifstream &textFile);
+        void processFile(std::ifstream &textFile);
         void pushWordsToMap(std::vector<std::string> &vecOfWords);
-        void pushNewWordToMap(std::string);
-        void processFoundWord(std::smatch &wordMatch, std::vector<std::string> &vecOfWords, std::string &stringFromFile);
-        void processNewStringDelimitedBySpace(std::string stringFromFile);
+        void pushWordToMap(std::string word);
+        void processFoundWord(std::string &stringFromFile, uint16_t positionOfSpace, std::vector<std::string> &vecOfWords);
 
         std::shared_ptr<std::mutex> mutexForFileAccess;
         std::shared_ptr<std::mutex> mutexForMapAccess;

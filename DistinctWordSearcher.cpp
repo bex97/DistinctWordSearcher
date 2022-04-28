@@ -17,23 +17,20 @@ namespace DistinctWords
     std::vector<std::string> DistinctWordSearcher::splitWords(std::string stringFromFile)
     {
         std::vector<std::string> vecOfWords;
-        std::smatch wordMatch;
-        std::regex regex("[a-z]+\\s+");
-        while (std::regex_search(stringFromFile, wordMatch, regex))
+        std::size_t positionOfSpaceChar;
+        while ((positionOfSpaceChar = stringFromFile.find_first_of("\t ")) != std::string::npos)
         {
-            processFoundWord(wordMatch, vecOfWords, stringFromFile);
+            processFoundWord(stringFromFile, positionOfSpaceChar, vecOfWords);
         }
-        if (stringFromFile != "")
-            vecOfWords.push_back(stringFromFile);
+        vecOfWords.push_back(stringFromFile);
         return vecOfWords;
     }
 
-    void DistinctWordSearcher::processFoundWord(std::smatch &wordMatch, std::vector<std::string> &vecOfWords, std::string &stringFromFile)
+    void DistinctWordSearcher::processFoundWord(std::string &stringFromFile, uint16_t positionOfSpaceChar, std::vector<std::string> &vecOfWords)
     {
-        std::string word = wordMatch.str();
-        word.erase(std::remove_if(word.begin(), word.end(), ::isspace), word.end());
+        std::string word = stringFromFile.substr(0, positionOfSpaceChar);
+        stringFromFile.erase(0, positionOfSpaceChar + 1);
         vecOfWords.push_back(word);
-        stringFromFile = wordMatch.suffix().str();
     }
 
     void DistinctWordSearcher::addDistinctWords(std::string newLineFromFile)
@@ -46,11 +43,12 @@ namespace DistinctWords
     {
         for (auto word : vecOfWords)
         {
-            pushNewWordToMap(word);
+            if (!word.empty())
+                pushWordToMap(word);
         }
     }
 
-    void DistinctWordSearcher::pushNewWordToMap(std::string newWord)
+    void DistinctWordSearcher::pushWordToMap(std::string newWord)
     {
         std::unique_lock ul(*mutexForMapAccess);
         if (!distinctWords->count(newWord))
@@ -59,7 +57,7 @@ namespace DistinctWords
         }
     }
 
-    void DistinctWordSearcher::processFileByLines(std::ifstream &textFile)
+    void DistinctWordSearcher::processFile(std::ifstream &textFile)
     {
         while (true)
         {
@@ -74,55 +72,16 @@ namespace DistinctWords
         }
     }
 
-    void DistinctWordSearcher::processFileByWords(std::ifstream &textFile)
-    {
-        while (true)
-        {
-            std::string stringFromFile;
-            std::unique_lock ul(*mutexForFileAccess);
-            if (textFile.eof())
-                break;
-            std::getline(textFile, stringFromFile, ' ');
-            ul.unlock();
-            processNewStringDelimitedBySpace(stringFromFile);
-        }
-    }
-
-    void DistinctWordSearcher::processNewStringDelimitedBySpace(std::string stringFromFile)
-    {
-        if (stringFromFile.find('\n') != std::string::npos)
-        {
-            addDistinctWords(stringFromFile);
-        }
-        else
-        {
-            pushNewWordToMap(stringFromFile);
-        }
-    }
-
     void DistinctWordSearcher::run(std::shared_ptr<FileProcessor> fileProcessor)
     {
-        auto fileProcessingType = fileProcessor->getFileProcessingType();
+        std::unique_lock ul(*mutexForFileAccess);
         auto &file = fileProcessor->getFile();
-
-        switch (fileProcessingType)
+        if (file.has_value())
         {
-        case FileProcessingType::PROCESSFILEBYLINES:
-        {
-            processFileByLines(file);
-            break;
+            ul.unlock();
+            processFile(file.value());
+            ul.lock();
+            fileProcessor->closeFile();
         }
-        case FileProcessingType::PROCESSFILEBYWORDS:
-        {
-            processFileByWords(file);
-            break;
-        }
-        default:
-        {
-            std::cerr << "File will not be processed. Please check file status";
-            break;
-        }
-        }
-        fileProcessor->closeFile();
     }
 }

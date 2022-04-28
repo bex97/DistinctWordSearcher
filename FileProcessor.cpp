@@ -10,58 +10,31 @@ namespace DistinctWords
 {
     FileProcessor::FileProcessor(std::string fileName)
     {
-        chooseFileProcessingMethod(fileName);
+        openFile(fileName);
     }
 
-    bool FileProcessor::didFileOpen(std::string fileName)
+    void FileProcessor::openFile(std::string fileName)
     {
-        file.open(fileName);
-        if (!file.is_open())
+        file.emplace();
+        file->open(fileName);
+        if (!file->is_open())
         {
             std::cerr << "File open failed!" << std::endl;
-            return false;
-        }
-        return true;
-    }
-
-    void FileProcessor::chooseFileProcessingMethod(std::string fileName)
-    {
-        if (!didFileOpen(fileName))
-            return;
-
-        std::string firstLineFromFile;
-        std::getline(file, firstLineFromFile);
-        setFileProcessingMethod(firstLineFromFile);
-        file.seekg(0);
-    }
-
-    void FileProcessor::setFileProcessingMethod(std::string firstLineFromFile)
-    {
-        if (firstLineFromFile.length() == firstLineFromFile.max_size() or file.eof())
-        {
-            fileProcessingType = FileProcessingType::PROCESSFILEBYWORDS;
-        }
-        else
-        {
-            fileProcessingType = FileProcessingType::PROCESSFILEBYLINES;
+            file.reset();
         }
     }
 
-    FileProcessingType FileProcessor::getFileProcessingType()
+    std::optional<std::ifstream>& FileProcessor::getFile()
     {
-        return fileProcessingType;
-    }
-
-    std::ifstream &FileProcessor::getFile()
-    {
-        if (fileProcessingType == FileProcessingType::FILENOTOPEN)
-            std::cout << "WARNING!!! Return value may be empty";
         return file;
     }
 
     void FileProcessor::closeFile()
     {
-        if (file.is_open())
-            file.close();
+        if (file && file->is_open())
+        {
+            file->close();
+            file.reset();
+        }
     }
 }

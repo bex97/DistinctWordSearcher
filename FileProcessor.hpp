@@ -1,6 +1,6 @@
 #pragma once
 #include <fstream>
-#include "Utils.hpp"
+#include <optional>
 
 namespace DistinctWords
 {
@@ -8,16 +8,12 @@ namespace DistinctWords
     {
     public:
         FileProcessor(std::string fileName);
-        std::ifstream &getFile();
-        FileProcessingType getFileProcessingType();
+        std::optional<std::ifstream> &getFile();
         void closeFile();
 
     private:
-        void setFileProcessingMethod(std::string firstLineFromFile);
-        bool didFileOpen(std::string fileName);
-        void chooseFileProcessingMethod(std::string fileName);
+        void openFile(std::string fileName);
 
-        std::ifstream file;
-        FileProcessingType fileProcessingType{FileProcessingType::FILENOTOPEN};
+        std::optional<std::ifstream> file;
     };
 }
